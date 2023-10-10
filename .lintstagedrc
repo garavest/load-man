@@ -1,0 +1,6 @@
+{
+  "*.?(c|m)@(j|t)s": ["eslint", "prettier -w"],
+  "*.md": ["markdownlint", "prettier -w"],
+  "*.prisma": "prettier -w --plugin prettier-plugin-prisma",
+  "*.svelte": ["eslint", "npm run check", "prettier -w --plugin prettier-plugin-svelte --plugin prettier-plugin-tailwindcss"]
+}

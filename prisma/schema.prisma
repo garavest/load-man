@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+type GoogleMapsGeocoderAddressComponent {
+  longName  String
+  shortName String
+  types     String[]
+}
+
+type GoogleMapsGeocoderResult {
+  placeId           String
+  addressComponents GoogleMapsGeocoderAddressComponent[]
+  formattedAddress  String
+}
+
+model PerDiemEntry {
+  businessMiles   Int
+  createdAt       DateTime                 @default(now())
+  date            DateTime
+  deduction       Float
+  id              String                   @id @default(auto()) @map("_id") @db.ObjectId
+  isConus         Boolean
+  isFullDeduction Boolean
+  location        GoogleMapsGeocoderResult
+  personalMiles   Int
+  updatedAt       DateTime                 @updatedAt
+}
