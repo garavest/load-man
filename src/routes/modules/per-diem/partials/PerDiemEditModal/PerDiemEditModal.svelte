@@ -60,18 +60,18 @@
 </script>
 
 {#if $modalStore[0]}
-  <div class="card w-modal space-y-4 p-4 shadow-xl">
+  <div class="card w-modal space-y-6 p-4 shadow-xl lg:space-y-8">
     <header class="text-2xl font-bold">Edit Per Diem Entry</header>
 
     <article>
-      <form action="?/update" method="POST" use:enhance>
+      <form class="modal-form space-y-4 lg:space-y-6" action="?/update" method="POST" use:enhance>
         <input aria-hidden="true" disabled="{true}" hidden="{true}" bind:value="{$form.id}" />
 
         <label class="label">
           <span>Date</span>
           <input
             aria-invalid="{$errors.date ? 'true' : undefined}"
-            class="input"
+            class="input rounded-md"
             class:input-error="{$errors.date}"
             type="date"
             bind:value="{$form.date}" />
@@ -93,7 +93,7 @@
           <span>Business Miles</span>
           <input
             aria-invalid="{$errors.businessMiles ? 'true' : undefined}"
-            class="input"
+            class="input rounded-md"
             class:input-error="{$errors.businessMiles}"
             type="number"
             bind:value="{$form.businessMiles}" />
@@ -103,13 +103,13 @@
           <span>Personal Miles</span>
           <input
             aria-invalid="{$errors.personalMiles ? 'true' : undefined}"
-            class="input"
+            class="input rounded-md"
             class:input-error="{$errors.personalMiles}"
             type="number"
             bind:value="{$form.personalMiles}" />
         </label>
 
-        <GoogleMapsSearch bind:value="{$form.location}" />
+        <GoogleMapsSearch bind:data="{$form.location}" />
       </form>
     </article>
 
