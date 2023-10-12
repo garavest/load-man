@@ -13,7 +13,7 @@
   import { PerDiemEditModal } from "./partials/PerDiemEditModal";
   import { selectedMonth, selectedYear } from "./stores";
 
-  import { goto } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { page } from "$app/stores";
   import { getMonthName } from "$lib/helpers";
 
@@ -56,13 +56,15 @@
       body: "Are you sure you wish to proceed? This action is <b>NOT</b> reversible!",
       response(r) {
         if (r === true) {
-          fetch(`?/delete&id=${entry.id}`, { method: "POST" })
-            .then(() =>
+          fetch(`/modules/per-diem/${entry.id}`, { method: "DELETE" })
+            .then(() => {
               toastStore.trigger({
                 background: "variant-filled-success",
                 message: "Per diem entry has been successfully deleted."
-              })
-            )
+              });
+
+              invalidateAll();
+            })
             .catch((err) => {
               toastStore.trigger({
                 background: "variant-filled-error",
@@ -145,10 +147,17 @@
 </div>
 
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-  {#each data.perDiemEntries as perDiemEntry}
-    <PerDiemCard
-      entry="{perDiemEntry}"
-      handleDelete="{openDeleteModal}"
-      handleEdit="{openEditModal}" />
-  {/each}
+  {#if data.perDiemEntries.length > 0}
+    {#each data.perDiemEntries as perDiemEntry}
+      <PerDiemCard
+        entry="{perDiemEntry}"
+        handleDelete="{openDeleteModal}"
+        handleEdit="{openEditModal}" />
+    {/each}
+  {:else}
+    <p>
+      No per diem entries found for the month and year selected. Use the Create Entry button above
+      to create an entry.
+    </p>
+  {/if}
 </div>
