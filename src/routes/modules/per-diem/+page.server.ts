@@ -4,7 +4,12 @@ import { actionResult, superValidate } from "sveltekit-superforms/server";
 
 import type { Actions, PageServerLoad } from "./$types";
 
-import { calculatePerDiemDeduction, checkIsConus, getDaysInMonth } from "$lib/helpers";
+import {
+  calculatePerDiemDeduction,
+  checkIsConus,
+  convertStringToDate,
+  getDaysInMonth
+} from "$lib/helpers";
 import { perDiemCreateSchema, perDiemEditSchema } from "$lib/schemas";
 import { prisma } from "$lib/server";
 
@@ -71,7 +76,7 @@ const actions: Actions = {
       entry = await prisma.perDiemEntry.create({
         data: {
           businessMiles: form.data.businessMiles,
-          date: new Date(Date.parse(form.data.date)),
+          date: convertStringToDate(form.data.date),
           deduction: calculatePerDiemDeduction(form.data),
           isConus: checkIsConus(form.data),
           isFullDeduction: form.data.deduction === "full",
@@ -90,24 +95,6 @@ const actions: Actions = {
     return actionResult("success", { form });
   },
 
-  async delete({ url }) {
-    const id = url.searchParams.get("id");
-
-    if (!id) {
-      return fail(400);
-    }
-
-    const entry = await prisma.perDiemEntry.delete({
-      where: { id }
-    });
-
-    if (typeof entry === "undefined") {
-      return fail(500);
-    }
-
-    return { success: true };
-  },
-
   async update({ request }) {
     const form = await superValidate(request, perDiemEditSchema);
     let entry: PerDiemEntry;
@@ -120,7 +107,7 @@ const actions: Actions = {
       entry = await prisma.perDiemEntry.update({
         data: {
           businessMiles: form.data.businessMiles,
-          date: new Date(Date.parse(form.data.date)),
+          date: convertStringToDate(form.data.date),
           deduction: calculatePerDiemDeduction(form.data),
           isConus: checkIsConus(form.data),
           isFullDeduction: form.data.deduction === "full",
