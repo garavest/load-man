@@ -1,14 +1,13 @@
 <script lang="ts">
   import { Autocomplete, popup, type PopupSettings } from "@skeletonlabs/skeleton";
+  import { writable } from "svelte/store";
 
   import { getGeocodedAddress, getPlacesAutocompleteOptions } from "$lib/client";
   import type { PlaceOption } from "$lib/interfaces";
   import type { GoogleMapsSearchResult } from "$lib/schemas";
 
-  export let value: GoogleMapsSearchResult | undefined;
+  export let data: GoogleMapsSearchResult;
 
-  let inputSearch: string = "";
-  let tempInput: string;
   let placeOptions: PlaceOption[] = [];
 
   const popupSettings: PopupSettings = {
@@ -17,39 +16,32 @@
     target: "popupAutocomplete"
   };
 
-  function onSearchInput(): void {
-    if (value !== undefined) {
-      value = undefined;
-    }
-
-    placeOptions = getPlacesAutocompleteOptions(inputSearch);
+  async function onSearchInput(): Promise<void> {
+    placeOptions = await getPlacesAutocompleteOptions($inputSearch);
   }
 
-  function onPlaceSelect(event: CustomEvent<PlaceOption>): void {
-    value = getGeocodedAddress(event.detail.meta?.prediction.place_id ?? "");
+  async function onPlaceSelect(event: CustomEvent<PlaceOption>): Promise<void> {
+    data = await getGeocodedAddress(event.detail.meta?.prediction.place_id ?? "");
   }
 
-  $: if (value !== undefined && tempInput !== value.formattedAddress) {
-    tempInput = value.formattedAddress;
-    inputSearch = tempInput;
-  }
+  $: inputSearch = writable<string>(data.formattedAddress);
 </script>
 
 <label class="label">
   <span>Search Location</span>
   <input
-    class="autocomplete input {$$restProps.class || ''}"
+    class="autocomplete input rounded-md {$$restProps.class || ''}"
     on:input="{onSearchInput}"
     placeholder="Search..."
     use:popup="{popupSettings}"
     type="search"
-    bind:value="{inputSearch}"
+    bind:value="{$inputSearch}"
     {...$$restProps} />
 </label>
 
 <div class="card p-4 shadow-xl" data-popup="popupAutocomplete">
   <Autocomplete
-    bind:input="{inputSearch}"
+    bind:input="{$inputSearch}"
     options="{placeOptions}"
     regionButton="!whitespace-normal text-left !w-full"
     on:selection="{onPlaceSelect}" />
