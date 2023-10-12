@@ -11,6 +11,7 @@
   import type { SuperValidated } from "sveltekit-superforms";
   import { superForm } from "sveltekit-superforms/client";
 
+  import { invalidateAll } from "$app/navigation";
   import { GoogleMapsSearch } from "$lib/components/GoogleMapsSearch";
   import {
     perDiemCreateSchema,
@@ -24,7 +25,7 @@
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
-  const { constraints, enhance, errors, form, tainted } = superForm(data, {
+  const { enhance, errors, form, tainted } = superForm(data, {
     dataType: "json",
     onError({ result }) {
       toastStore.trigger({
@@ -39,6 +40,8 @@
           background: "variant-filled-success",
           message: "Your per diem entry has been created."
         });
+
+        invalidateAll();
       }
     },
     validators: perDiemCreateSchema
@@ -76,12 +79,11 @@
             <label class="label">
               <span>Entry Date</span>
               <input
-                class="input"
+                class="input rounded-md"
                 class:input-error="{$errors.date}"
                 placeholder="Entry date..."
                 type="date"
-                bind:value="{$form.date}"
-                {...$constraints.date} />
+                bind:value="{$form.date}" />
             </label>
             {#if $errors.date}
               {#each $errors.date as error}
@@ -117,12 +119,11 @@
             <label class="label">
               <span>Business Miles</span>
               <input
-                class="input"
+                class="input rounded-md"
                 class:input-error="{$errors.date}"
                 placeholder="Business miles..."
                 type="number"
-                bind:value="{$form.businessMiles}"
-                {...$constraints.businessMiles} />
+                bind:value="{$form.businessMiles}" />
             </label>
             {#if $errors.businessMiles}
               {#each $errors.businessMiles as error}
@@ -133,12 +134,11 @@
             <label class="label">
               <span>Personal Miles</span>
               <input
-                class="input"
+                class="input rounded-md"
                 class:input-error="{$errors.date}"
                 placeholder="Personal miles..."
                 type="number"
-                bind:value="{$form.personalMiles}"
-                {...$constraints.personalMiles} />
+                bind:value="{$form.personalMiles}" />
             </label>
             {#if $errors.personalMiles}
               {#each $errors.personalMiles as error}
@@ -158,7 +158,7 @@
               lookup and format the address.
             </p>
 
-            <GoogleMapsSearch bind:value="{$form.location}" />
+            <GoogleMapsSearch bind:data="{$form.location}" />
           </Step>
 
           <!-- STEP 5: Confirmation -->
