@@ -18,74 +18,47 @@ function getLoader(): Loader {
   return loader;
 }
 
-function getPlacesAutocompleteOptions(searchString: string): PlaceOption[] {
+async function getPlacesAutocompleteOptions(searchString: string): Promise<PlaceOption[]> {
   const placeOptions: PlaceOption[] = [];
 
-  getLoader()
-    .importLibrary("places")
-    .then((placesLibrary) => {
-      const autocompleteService = new placesLibrary.AutocompleteService();
+  const placesLibrary = await getLoader().importLibrary("places");
+  const autocompleteService = new placesLibrary.AutocompleteService();
+  const autocompleteResponse = await autocompleteService.getPlacePredictions({
+    input: searchString
+  });
 
-      autocompleteService
-        .getPlacePredictions({ input: searchString })
-        .then((response) => {
-          if (response.predictions.length > 0) {
-            response.predictions.forEach((prediction) => {
-              placeOptions.push({
-                label: `<span><b>${prediction.structured_formatting.main_text}</b>, ${prediction.structured_formatting.secondary_text}</span>`,
-                meta: {
-                  prediction
-                },
-                value: prediction.place_id
-              });
-            });
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    })
-    .catch((error) => {
-      console.error(error);
+  if (autocompleteResponse.predictions.length > 0) {
+    autocompleteResponse.predictions.forEach((prediction) => {
+      placeOptions.push({
+        label: `<span><b>${prediction.structured_formatting.main_text}</b>, ${prediction.structured_formatting.secondary_text}</span>`,
+        meta: {
+          prediction
+        },
+        value: prediction.place_id
+      });
     });
+  }
 
   return placeOptions;
 }
 
-function getGeocodedAddress(placeId: string): GoogleMapsSearchResult | undefined {
-  let geocodedAddress: GoogleMapsSearchResult | undefined;
+async function getGeocodedAddress(placeId: string): Promise<GoogleMapsSearchResult> {
+  const geocodingLibrary = await getLoader().importLibrary("geocoding");
+  const geocoder = new geocodingLibrary.Geocoder();
+  const geocoderResponse = await geocoder.geocode({ placeId });
+  const [result] = geocoderResponse.results;
 
-  getLoader()
-    .importLibrary("geocoding")
-    .then((geocodingLibrary) => {
-      const geocoder = new geocodingLibrary.Geocoder();
-
-      geocoder
-        .geocode({ placeId })
-        .then((response) => {
-          const [result] = response.results;
-
-          geocodedAddress = {
-            addressComponents: result.address_components.map((addressComponent) => {
-              return {
-                longName: addressComponent.long_name,
-                shortName: addressComponent.short_name,
-                types: addressComponent.types
-              };
-            }),
-            formattedAddress: result.formatted_address,
-            placeId: result.place_id
-          };
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-
-  return geocodedAddress;
+  return {
+    addressComponents: result.address_components.map((addressComponent) => {
+      return {
+        longName: addressComponent.long_name,
+        shortName: addressComponent.short_name,
+        types: addressComponent.types
+      };
+    }),
+    formattedAddress: result.formatted_address,
+    placeId: result.place_id
+  };
 }
 
 export { getGeocodedAddress, getPlacesAutocompleteOptions };
