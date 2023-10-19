@@ -24,7 +24,7 @@ function checkIsConus(entry: PerDiemFormEntry): boolean {
 function calculatePerDiemDeduction(entry: PerDiemFormEntry): number {
   const isConus = checkIsConus(entry);
   const isFullDeduction = entry.deduction === "full";
-  const entryDate = Date.parse(entry.date);
+  const entryDate = Date.parse(entry.date.toLocaleString());
 
   // Find the correct per diem rate
   const perDiemRate = perDiemRates.find((rate) => {
