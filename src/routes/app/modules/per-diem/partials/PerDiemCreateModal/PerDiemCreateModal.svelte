@@ -9,7 +9,7 @@
     ListBoxItem
   } from "@skeletonlabs/skeleton";
   import type { SuperValidated } from "sveltekit-superforms";
-  import { superForm } from "sveltekit-superforms/client";
+  import { dateProxy, superForm } from "sveltekit-superforms/client";
 
   import { invalidateAll } from "$app/navigation";
   import { GoogleMapsSearch } from "$lib/components/GoogleMapsSearch";
@@ -25,9 +25,10 @@
   const modalStore = getModalStore();
   const toastStore = getToastStore();
 
-  const { enhance, errors, form, tainted } = superForm(data, {
+  const { constraints, enhance, errors, form, tainted } = superForm(data, {
     dataType: "json",
     onError({ result }) {
+      modalStore.close();
       toastStore.trigger({
         background: "variant-filled-error",
         message: result.error.message
@@ -47,8 +48,10 @@
     validators: perDiemCreateSchema
   });
 
+  const proxyDate = dateProxy(form, "date", { format: "date" });
+
   function isStepLocked(step: keyof PerDiemCreateEntry): boolean {
-    if ($tainted && !$tainted[step]) {
+    if (!$tainted?.[step]) {
       return true;
     }
 
@@ -79,11 +82,13 @@
             <label class="label">
               <span>Entry Date</span>
               <input
-                class="input rounded-md"
+                aria-invalid="{$errors.date ? 'true' : undefined}"
+                class="input form-input rounded-md"
                 class:input-error="{$errors.date}"
-                placeholder="Entry date..."
                 type="date"
-                bind:value="{$form.date}" />
+                bind:value="{$proxyDate}"
+                {...$constraints.date}
+                max="{$constraints.date?.max?.toString().slice(0, 10)}" />
             </label>
             {#if $errors.date}
               {#each $errors.date as error}
@@ -119,11 +124,13 @@
             <label class="label">
               <span>Business Miles</span>
               <input
+                aria-invalid="{$errors.businessMiles ? 'true' : undefined}"
                 class="input rounded-md"
-                class:input-error="{$errors.date}"
+                class:input-error="{$errors.businessMiles}"
                 placeholder="Business miles..."
                 type="number"
-                bind:value="{$form.businessMiles}" />
+                bind:value="{$form.businessMiles}"
+                {...$constraints.businessMiles} />
             </label>
             {#if $errors.businessMiles}
               {#each $errors.businessMiles as error}
@@ -134,8 +141,9 @@
             <label class="label">
               <span>Personal Miles</span>
               <input
+                aria-invalid="{$errors.personalMiles ? 'true' : undefined}"
                 class="input rounded-md"
-                class:input-error="{$errors.date}"
+                class:input-error="{$errors.personalMiles}"
                 placeholder="Personal miles..."
                 type="number"
                 bind:value="{$form.personalMiles}" />
@@ -166,9 +174,7 @@
             <svelte:fragment slot="header">Confirm the details</svelte:fragment>
             <p>Ok! The final step is to confirm the details below.</p>
             <p>
-              This per diem entry is for <b
-                >{new Date(Date.parse($form.date)).toLocaleDateString()}</b
-              >.
+              This per diem entry is for <b>{$form.date.toLocaleDateString()}</b>.
             </p>
             <p>You are taking the <b>{$form.deduction}</b> deduction.</p>
             <p>

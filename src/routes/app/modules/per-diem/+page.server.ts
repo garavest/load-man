@@ -76,7 +76,7 @@ const actions: Actions = {
       entry = await prisma.perDiemEntry.create({
         data: {
           businessMiles: form.data.businessMiles,
-          date: convertStringToDate(form.data.date),
+          date: form.data.date,
           deduction: calculatePerDiemDeduction(form.data),
           isConus: checkIsConus(form.data),
           isFullDeduction: form.data.deduction === "full",
