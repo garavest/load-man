@@ -1,0 +1,19 @@
+# Ignore CI, git, and editor files
+.github/
+.husky/
+.vscode/
+
+# Ignore Developer tool configurations
+.editorconfig
+.eslintignore
+.lintstagedrc
+.markdownlint.json
+.nvmrc
+.prettierignore
+commitlint.config.cjs
+eslint.config.js
+playwright.config.ts
+prettier.config.js
+
+# Ignore example docker-compose.yml
+docker-compose.yml

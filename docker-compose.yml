@@ -1,0 +1,29 @@
+version: "3.3"
+services:
+  # We REALLY don't advise hosting your own database like this, but as long as your system is well
+  # secured, it should be okay.
+  mongodb:
+    image: mongo
+    restart: always
+    environment:
+      # This should be changed to a secure username. Ideally something randomly generated and not
+      # readily known.
+      MONGO_INITDB_ROOT_USERNAME: root
+
+      # This should also be changed. Again, randomly generated and not known. The longer, the
+      # better.
+      MONGO_INITDB_ROOT_PASSWORD: example
+  load-man:
+    image: load-man
+    # Load Man itself should only restart on failure
+    restart: on-failure
+
+    ports:
+      # The container exposes the app on port 3000. This is so that a reverse proxy can be added.
+      # If you wish to expose the app on port 4430 for example, change the first 3000 ro 4430.
+      - 3000:3000
+    environment:
+      # This should be changed. root:example should be changed to match the username and password
+      # selected above. Additionally, collection should be changed to the name of the collection
+      # you wish to use.
+      DATABASE_URL: mongodb://root:example@mongo:27017/collection
