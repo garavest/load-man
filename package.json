@@ -33,7 +33,7 @@
     "@googlemaps/js-api-loader": "^1.16.2",
     "@iconify/svelte": "^3.1.4",
     "@lucia-auth/adapter-prisma": "^3.0.2",
-    "@lucia-auth/oauth": "^3.3.1",
+    "@lucia-auth/oauth": "^3.5.1",
     "@playwright/test": "^1.39.0",
     "@skeletonlabs/skeleton": "^2.4.0",
     "@skeletonlabs/tw-plugin": "^0.2.3",
